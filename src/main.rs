@@ -35,7 +35,7 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
 
     let post_type_id: u8 = e.try_get_attribute(b"PostTypeId")?.expect(&format!("post type not found in post {:?}", e)).unescape_value()?.to_string().parse()?;
 
-    if post_type_id == 2 { return Ok(None)}; // skip answers
+    if post_type_id != 1 { return Ok(None)}; // skip answers, wiki, etc (https://meta.stackexchange.com/questions/99265/meaning-of-values-for-posttypeid-in-data-explorer-or-in-data-dump)
 
     // parse id to usize
     let id: usize = e.try_get_attribute(b"Id")?
