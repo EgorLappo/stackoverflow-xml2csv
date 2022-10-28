@@ -53,7 +53,7 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
                      .unescape_value()?.to_string()
                      .parse()?;
     let view_count: usize = e.try_get_attribute(b"ViewCount")?
-                           .expect(&format!("no view count found in post with type id {:?}: {:?}", post_type_id, e))
+                           .expect(&format!("no view count found in post {:?}", e))
                            .unescape_value()?.to_string()
                            .parse()?;
     let owner_user_id: Option<usize> = e.try_get_attribute(b"OwnerUserId")?
