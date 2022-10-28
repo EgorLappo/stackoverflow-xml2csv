@@ -33,7 +33,7 @@ struct Post {
 
 fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
 
-    let post_type_id: u8 = e.try_get_attribute(b"PostTypeId")?.expect(&format!("post type not found in post {:?}", e)).unescape_value()?.to_string().parse()?;
+    let post_type_id: usize = e.try_get_attribute(b"PostTypeId")?.expect(&format!("post type not found in post {:?}", e)).unescape_value()?.to_string().parse()?;
 
     if post_type_id != 1 { return Ok(None)}; // skip answers, wiki, etc (https://meta.stackexchange.com/questions/99265/meaning-of-values-for-posttypeid-in-data-explorer-or-in-data-dump)
 
@@ -53,7 +53,7 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
                      .unescape_value()?.to_string()
                      .parse()?;
     let view_count: usize = e.try_get_attribute(b"ViewCount")?
-                           .expect(&format!("no view count found in post {:?}", e))
+                           .expect(&format!("no view count found in post with type id {:?}: {:?}", post_type_id, e))
                            .unescape_value()?.to_string()
                            .parse()?;
     let owner_user_id: Option<usize> = e.try_get_attribute(b"OwnerUserId")?
