@@ -33,15 +33,15 @@ struct Post {
 
 fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
 
-    let post_type_id: u8 = e.try_get_attribute(b"PostTypeId")?.expect("post type not found!").unescape_value()?.to_string().parse().expect("post type is not a number!");
+    let post_type_id: u8 = e.try_get_attribute(b"PostTypeId")?.expect(&format!("post type not found in post {:?}", e)).unescape_value()?.to_string().parse()?;
 
     if post_type_id == 2 { return Ok(None)}; // skip answers
 
     // parse id to usize
     let id: usize = e.try_get_attribute(b"Id")?
-                   .expect("no post id found!")
+                   .expect(&format!("no post id found in post {:?}", e))
                    .unescape_value()?.to_string()
-                   .parse().expect("post id is not a number!");
+                   .parse()?;
     let accepted_answer_id: Option<usize> = e.try_get_attribute(b"AcceptedAnswerId")?
                                            .map(|x| x.unescape_value().unwrap().to_string()
                                                      .parse().expect("post id is not a number!"));
@@ -49,30 +49,30 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
                         .expect("no creation date found!")
                         .unescape_value()?.to_string();
     let score: i32 = e.try_get_attribute(b"Score")?
-                     .expect("no score found!")
+                     .expect(&format!("no score found in post {:?}", e))
                      .unescape_value()?.to_string()
-                     .parse().expect("score is not a number!");
+                     .parse()?;
     let view_count: usize = e.try_get_attribute(b"ViewCount")?
-                           .expect("no view count found!")
+                           .expect(&format!("no view count found in post {:?}", e))
                            .unescape_value()?.to_string()
-                           .parse().expect("view count is not a number!");
+                           .parse()?;
     let owner_user_id: Option<usize> = e.try_get_attribute(b"OwnerUserId")?
                                       .map(|x| x.unescape_value().unwrap().to_string()
                                                 .parse().expect("owner user id is not a number!"));
     let title = e.try_get_attribute(b"Title")?
-                    .expect("no title found!")
+                    .expect(&format!("no title found in post {:?}", e))
                     .unescape_value()?.to_string();
     let tags = e.try_get_attribute(b"Tags")?
                 .expect("no tags found!")
                 .unescape_value()?.to_string();
     let answer_count: usize = e.try_get_attribute(b"AnswerCount")?
-                             .expect("no answer count found!")
+                             .expect(&format!("no answer count found in post {:?}", e))
                              .unescape_value()?.to_string()
-                             .parse().expect("answer count is not a number!");
+                             .parse()?;
     let comment_count: usize = e.try_get_attribute(b"CommentCount")?
-                              .expect("no comment count found!")
+                              .expect(&format!("no comment count found in post {:?}", e))
                               .unescape_value()?.to_string()
-                              .parse().expect("comment count is not a number!");
+                              .parse()?;
     
     let post = Post {
         id,
