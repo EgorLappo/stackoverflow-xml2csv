@@ -13,28 +13,25 @@ use quick_xml::{
 use serde::Serialize;
 use csv;
 
-const BUF_SIZE: usize = 4096; // 4kb at once
+const BUF_SIZE: usize = 4096 * 2;
 
-#[derive(Debug, Serialize)]
-enum PostType {
-    Question(Option<usize>), // contains accepted answer id
-    Answer(usize), // contains parent id
-}
 
 // stackoverflow post, keeping only relevant parts
 // in particular, drop the body of the post
 #[derive(Debug, Serialize)]
 struct Post {
     id: usize,
-    post_type: PostType,
+    post_type: String,
+    accepted_answer_id: Option<usize>,
+    parent_id: Option<usize>,
     creation_date: String,
     score: i32,
-    view_count: usize,
+    view_count: Option<usize>,
     owner_user_id: Option<usize>,
-    title: String,
-    tags: String,
-    answer_count: usize,
-    comment_count: usize,
+    title: Option<String>,
+    tags: Option<String>,
+    answer_count: Option<usize>,
+    comment_count: Option<usize>,
 }
 
 fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
@@ -51,7 +48,11 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
 
     let accepted_answer_id: Option<usize> = e.try_get_attribute(b"AcceptedAnswerId")?
                                            .map(|x| x.unescape_value().unwrap().to_string()
-                                                     .parse().expect("post id is not a number!"));
+                                                     .parse().expect("accepted answer id is not a number!"));
+
+    let parent_id: Option<usize> = e.try_get_attribute(b"ParentId")?
+                                      .map(|x| x.unescape_value().unwrap().to_string()
+                                                .parse().expect("parent id is not a number!"));  
 
     let creation_date = e.try_get_attribute(b"CreationDate")?
                         .expect("no creation date found!")
@@ -62,37 +63,34 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
                      .unescape_value()?.to_string()
                      .parse()?;
 
-    let view_count: usize = e.try_get_attribute(b"ViewCount")?
-                           .expect(&format!("no view count found in post {:?}", e))
-                           .unescape_value()?.to_string()
-                           .parse()?;
+    let view_count: Option<usize> = e.try_get_attribute(b"ViewCount")?
+                                    .map(|x| x.unescape_value().unwrap().to_string()
+                                              .parse().expect("view count is not a number!"));
 
     let owner_user_id: Option<usize> = e.try_get_attribute(b"OwnerUserId")?
                                       .map(|x| x.unescape_value().unwrap().to_string()
                                                 .parse().expect("owner user id is not a number!"));
 
     let title = e.try_get_attribute(b"Title")?
-                    .expect(&format!("no title found in post {:?}", e))
-                    .unescape_value()?.to_string();
+                .map(|x| x.unescape_value().unwrap().to_string());
 
     let tags = e.try_get_attribute(b"Tags")?
-                .expect("no tags found!")
-                .unescape_value()?.to_string();
+                .map(|x| x.unescape_value().unwrap().to_string());
 
-    let answer_count: usize = e.try_get_attribute(b"AnswerCount")?
-                             .expect(&format!("no answer count found in post {:?}", e))
-                             .unescape_value()?.to_string()
-                             .parse()?;
+    let answer_count: Option<usize> = e.try_get_attribute(b"AnswerCount")?
+                                        .map(|x| x.unescape_value().unwrap().to_string()
+                                                    .parse().expect("answer count is not a number!"));
 
-    let comment_count: usize = e.try_get_attribute(b"CommentCount")?
-                              .expect(&format!("no comment count found in post {:?}", e))
-                              .unescape_value()?.to_string()
-                              .parse()?;
+    let comment_count: Option<usize> = e.try_get_attribute(b"CommentCount")?
+                                        .map(|x| x.unescape_value().unwrap().to_string()
+                                                    .parse().expect("comment count is not a number!"));
     
     if post_type_id == 1 {
         let post = Post {
             id,
-            post_type: PostType::Question(accepted_answer_id),
+            post_type: "question".to_string(),
+            accepted_answer_id,
+            parent_id,
             creation_date,
             score,
             view_count,
@@ -107,7 +105,9 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
     } else if post_type_id == 2 {
         let post = Post {
             id,
-            post_type: PostType::Answer(id),
+            post_type: "answer".to_string(),
+            accepted_answer_id,
+            parent_id,
             creation_date,
             score,
             view_count,
@@ -169,7 +169,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     println!("Done!");
-    println!("{} posts processed, {} questions written to csv.", post_count, processed_count);
+    println!("{} posts processed, {} posts written to csv.", post_count, processed_count);
 
     Ok(())
 }

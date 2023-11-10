@@ -1,0 +1,9 @@
+id,post_type,accepted_answer_id,parent_id,creation_date,score,view_count,owner_user_id,title,tags,answer_count,comment_count
+4,question,7,,2008-07-31T21:42:52.667,781,67914,8,How to convert Decimal to Double in C#?,<c#><floating-point><type-conversion><double><decimal>,14,6
+6,question,31,,2008-07-31T22:08:08.620,318,23047,9,Why did the width collapse in the percentage width child element in an absolutely positioned parent on Internet Explorer 7?,<html><css><internet-explorer-7>,7,0
+7,answer,,4,2008-07-31T22:17:57.883,517,,9,,,,1
+9,question,1404,,2008-07-31T23:40:59.743,2161,757897,1,How do I calculate someone's age based on a DateTime type birthday?,<c#><.net><datetime>,71,10
+11,question,1248,,2008-07-31T23:55:37.967,1629,193525,1,Calculate relative time in C#,<c#><datetime><time><datediff><relative-time-span>,41,3
+12,answer,,11,2008-07-31T23:56:41.303,345,,1,,,,10
+13,question,,,2008-08-01T00:42:38.903,689,263594,9,Determine a user's timezone,<html><browser><timezone><user-agent><timezone-offset>,27,10
+14,question,,,2008-08-01T00:59:11.177,482,167889,11,Difference between Math.Floor() and Math.Truncate(),<.net><math>,13,1
