@@ -25,6 +25,7 @@ struct Post {
     accepted_answer_id: Option<usize>,
     parent_id: Option<usize>,
     creation_date: String,
+    closed_date: Option<String>,
     score: i32,
     view_count: Option<usize>,
     owner_user_id: Option<usize>,
@@ -57,6 +58,9 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
     let creation_date = e.try_get_attribute(b"CreationDate")?
                         .expect("no creation date found!")
                         .unescape_value()?.to_string();
+
+    let closed_date: Option<String> = e.try_get_attribute(b"ClosedDate")?
+                                      .map(|x| x.unescape_value().unwrap().to_string());
 
     let score: i32 = e.try_get_attribute(b"Score")?
                      .expect(&format!("no score found in post {:?}", e))
@@ -92,6 +96,7 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
             accepted_answer_id,
             parent_id,
             creation_date,
+            closed_date,
             score,
             view_count,
             owner_user_id,
@@ -109,6 +114,7 @@ fn process_post(e: &BytesStart) -> Result<Option<Post>, Box<dyn Error>> {
             accepted_answer_id,
             parent_id,
             creation_date,
+            closed_date,
             score,
             view_count,
             owner_user_id,
